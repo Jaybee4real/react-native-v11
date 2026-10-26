@@ -45,10 +45,14 @@ export const useSmileIDView = (viewName: string, props: SmileIDProps) => {
       'onSmileResult',
       (event) => {
         // Use the ref to access the latest callback
-        setViewProps((prev) => ({
-          ...prev,
-          _invalidationKey: Date.now(),
-        }));
+        // A re-render here pushes setParams again, and Android re-runs the
+        // whole capture flow on setParams, showing its result dialog twice.
+        if (Platform.OS !== 'android') {
+          setViewProps((prev) => ({
+            ...prev,
+            _invalidationKey: Date.now(),
+          }));
+        }
         if (onResultRef.current) {
           const nativeEvent = {
             nativeEvent: {
