@@ -86,9 +86,11 @@ abstract class SmileIDView(private val currentContext: Context) : LinearLayout(c
   open fun sendEvent(map: WritableMap) {
     val listener = smileViewListener ?: return
     listener.emitSuccess(map)
+    // Kept after an error so a partner that stays on the screen still has a view; release() disposes it.
+    if (map.hasKey("error")) return
     // The SDK's result screen is a Compose Dialog in its own window; it stays on top of
     // the next React Native screen until this composition is disposed.
-    Handler(Looper.getMainLooper()).post { disposeContent() }
+    Handler(Looper.getMainLooper()).post { if (!released) disposeContent() }
   }
 
   fun disposeContent() {
